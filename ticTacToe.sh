@@ -24,9 +24,10 @@ letterAssign()
 	if (( $randomNumber == 0 ))
 	then
 		letter="X"
-
+		turn=1
 	else
 		letter="O"
+		turn=2
 	fi
 }
 firstChance()
