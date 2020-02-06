@@ -30,19 +30,36 @@ letterAssign()
 		turn=2
 	fi
 }
-firstChance()
+
+displayBoard()
 {
-	read -p "Enter your choice [H/T]: " choice
-	if (( "${toss[$((RANDOM%2))]}" == "$choice"  ))
-	then
-		turn=1
-	else
-		turn=2
-	fi 
+	for ((i=0;i<$ROWS;i++))
+	do
+		for ((j=0;j<$COLUMNS;j++))
+		do
+				printf " ${board[$i,$j]} "
+			if (( $j < $(( $COLUMNS - 1 )) ))
+			then
+				printf "|"
+			fi
+		done
+		echo
+		if (( $i < $(( $ROWS - 1 )) ))
+		then 
+			k=0
+			while (( $k < $(( $(($ROWS*4)) - 1 )) ))
+			do
+				printf "-"
+				((k++))
+			done
+			echo
+		fi
+	done
 }
 
 resetGame
 letterAssign
+displayBoard
 
 
 
