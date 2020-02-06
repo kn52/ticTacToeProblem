@@ -1,10 +1,12 @@
-#!/bin/bash
+#!/bin/bash -x
 readonly ROWS=3
 readonly COLUMNS=3
 declare -A board
-
-echo "Welcome to Tic Tac Toe Problem"
-
+random()
+{
+	randomValue=$((RANDOM%2))
+	echo $randomValue
+}
 resetGame()
 {
 	for ((i=0;i<$ROWS;i++))
@@ -16,4 +18,37 @@ resetGame()
 	done
 }
 
+letterAssign()
+{
+	randomNumber=$( random )
+	if (( $randomNumber == 0 ))
+	then
+		letter="X"
+
+	else
+		letter="O"
+	fi
+}
+firstChance()
+{
+	read -p "Enter your choice [H/T]: " choice
+	if (( "${toss[$((RANDOM%2))]}" == "$choice"  ))
+	then
+		turn=1
+	else
+		turn=2
+	fi 
+}
+
 resetGame
+letterAssign
+
+
+
+
+
+
+
+
+
+
