@@ -239,8 +239,3 @@ startGame()
 startGame
 displayBoard
 ticTacToe
-
-
-
-
-
