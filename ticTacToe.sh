@@ -197,12 +197,148 @@ input()
 		echo "Board is Occupied"
 	fi
 }
-
+#computerSmartMoveInRow
+computerSmartMoveInRow()
+{
+	flag=0
+	letter=$1
+	for ((i=0;i<$ROWS;i++))
+	do
+		j=0
+		if (( ${board[$i,$j]} == $letter && ${board[$i,$((j+1))]} == $letter && ${board[$i,$((j+2))]} == $EMPTY ))	
+		then 
+			x=$i 
+			y=$((j+2))
+			flag=1
+			input
+			break
+		fi
+		if (( ${board[$i,$j]} == $EMPTY && ${board[$i,$((j+1))]} == $letter && ${board[$i,$((j+2))]} == $letter ))	
+		then
+			x=$i 
+			y=$j
+			flag=1 
+			input
+			break
+		fi
+		if (( ${board[$i,$j]} == $letter && ${board[$i,$((j+1))]} == $EMPTY && ${board[$i,$((j+2))]} == $letter ))	
+		then 
+			x=$i 
+			y=$((j+1))
+			flag=1
+			input
+			break
+		fi
+	done
+}
+#computerSmartMoveInColumn
+computerSmartMoveInColumn()
+{
+	flag=0
+	letter=$1
+	for ((i=0;i<$ROWS;i++))
+	do
+		j=0
+		if (( ${board[$j,$i]} == $letter && ${board[$((j+1)),$i]} == $letter && ${board[$((j+2)),$i]} == $EMPTY ))	
+		then 
+			x=$((j+2)) 
+			y=$i
+			flag=1
+			input
+			break
+		fi
+		if (( ${board[$j,$i]} == $EMPTY && ${board[$((j+1)),$i]} == $letter && ${board[$((j+2)),$i]} == $letter ))	
+		then 
+			x=$j 
+			y=$i
+			flag=1			
+			input
+			break
+		fi
+		if (( ${board[$j,$i]} == $letter && ${board[$((j+1)),$i]} == $EMPTY && ${board[$((j+2)),$i]} == $letter ))	
+		then 
+			x=$((j+1)) 
+			y=$i
+			flag=1
+			input
+			break
+		fi
+	done
+}
+#computerSmartMoveInDiagonal
+computerSmartMoveInDiagonal()
+{
+	flag=0
+	letter=$1
+	if (( ${board[0,0]} == $letter && ${board[1,1]} == $letter && ${board[2,2]} == $EMPTY ))
+	then
+		x=2
+		y=2
+		flag=1
+		input
+	fi 
+	if (( ${board[0,0]} == $letter && ${board[1,1]} == $EMPTY && ${board[2,2]} == $letter ))
+	then 
+		x=1
+		y=1
+		flag=1
+		input
+	fi
+	if (( ${board[0,0]} == $EMPTY && ${board[1,1]} == $letter && ${board[2,2]} == $letter ))
+	then 
+		x=0
+		y=0
+		flag=1
+		input
+	fi
+	if (( ${board[2,0]} == $letter && ${board[1,1]} == $letter && ${board[0,2]} == $EMPTY ))
+	then 
+		x=0
+		y=2
+		flag=1
+		input
+	fi
+	if (( ${board[2,0]} == $letter && ${board[1,1]} == $EMPTY && ${board[0,2]} == $letter ))
+	then 
+		x=1
+		y=1
+		flag=1
+		input
+	fi
+	if (( ${board[2,0]} == $EMPTY && ${board[1,1]} == $letter && ${board[0,2]} == $letter ))
+	then 
+		x=2
+		y=0
+		flag=1
+		input
+	fi
+}
+#computerSmartMove
+computerSmartMove()
+{
+	sign=$1
+	computerSmartMoveInRow $sign
+	if [[ $flag -eq 0 ]]
+	then
+		computerSmartMoveInColumn $sign
+	elif [[ $flag -eq 0 ]]
+	then
+		computerSmartMoveInDiagonal $sign
+	fi	
+}
 #computerMove
 computerMove()
 {	
-	echo "I am second player"
-	exit
+	if [[ $x -eq 0 && $y -eq 0 ]]
+	then
+		computerSmartMove $computerTurn
+	fi	
+	if [[ $x -eq 0 && $y -eq 0 ]]
+	then
+		x=$((RANDOM%3))
+		y=$((RANDOM%3))
+		input
+	fi
 }
 #opponentMove
 opponentMove()
@@ -226,7 +362,13 @@ ticTacToe()
 			opponentMove			
 		elif (( $playerTurn == $computerTurn ))
 		then				
-			computerMove			
+			echo "Computer Move"
+			if [[ $count -eq 1 ]]
+			then
+				computerCorner
+			else			
+				computerMove			
+			fi			
 		fi
 	done
 }
