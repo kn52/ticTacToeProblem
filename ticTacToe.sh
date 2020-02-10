@@ -305,7 +305,10 @@ computerSmartMoveInDiagonal()
 		flag=1
 		input
 	fi
-	if (( ${board[2,0]} == $EMPTY && ${board[1,1]} == $letter && ${board[0,2]} == $letter ))
+	if (( ${board[2,0]} == $EMPTY if [[ $x -eq 0 && $y -eq 0 ]]
+	then
+		computerCentre
+	fi&& ${board[1,1]} == $letter && ${board[0,2]} == $letter ))
 	then 
 		x=2
 		y=0
@@ -313,6 +316,69 @@ computerSmartMoveInDiagonal()
 		input
 	fi
 }
+#computerCorner
+computerCorner()
+{
+	for (( i=0;i<$ROWS;i=$((i+2)) ))
+	do
+		for (( j=0;j<$COLUMNS;j=$((j+2)) ))
+		do
+			if (( ${board[$i,$j]} == 5 ))
+			then
+				x=$i 
+				y=$j
+				break
+			fi
+		done
+	done
+	input
+}
+#computerCentre
+computerCentre()
+{
+	if (( ${board[1,1]} == 5 ))
+	then
+		x=1 
+		y=1
+	fi
+	input
+}
+#computerSide
+computerSide()
+{
+	key=0
+	flag=0
+	for (( i=0 ;i<$ROWS;i++ ))
+	do
+		if (( $key == 0 ))
+		then
+			if (( ${board[$i,$((key+1))]} == $computerTurn ))
+			then
+				x=$i
+				y=$(($key+1))
+				flag=1
+			fi
+			key=1
+		else
+			for ((j=0;j<$COLUMNS;j=j+2))
+			do
+				if (( ${board[$i,$((j+2))]} == $computerTurn ))
+				then
+					x=$i
+					y=$((j+2))
+					flag=1
+				fi
+			done
+			key=0
+		fi
+		if (( $flag == 1 ))
+		then
+			break
+		fi
+	done
+	input		
+}
+
 #computerSmartMove
 computerSmartMove()
 {
@@ -347,9 +413,7 @@ computerMove()
 	fi
 	if [[ $x -eq 0 && $y -eq 0 ]]
 	then
-		x=$((RANDOM%3))
-		y=$((RANDOM%3))
-		input
+		computerSide
 	fi
 }
 #opponentMove
