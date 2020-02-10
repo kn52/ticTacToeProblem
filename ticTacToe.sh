@@ -313,6 +313,23 @@ computerSmartMoveInDiagonal()
 		input
 	fi
 }
+#computerCorner
+computerCorner()
+{
+	for (( i=0;i<$ROWS;i=$((i+2)) ))
+	do
+		for (( j=0;j<$COLUMNS;j=$((j+2)) ))
+		do
+			if (( ${board[$i,$j]} == 5 ))
+			then
+				x=$i 
+				y=$j
+				break
+			fi
+		done
+	done
+	input
+}
 #computerSmartMove
 computerSmartMove()
 {
@@ -333,12 +350,14 @@ computerMove()
 	then
 		computerSmartMove $computerTurn
 	fi	
-
 	if [[ $x -eq 0 && $y -eq 0 ]]
 	then
 		computerSmartMove $opponentTurn	
 	fi
-
+	if [[ $x -eq 0 && $y -eq 0 ]]
+	then
+		computerCorner
+	fi
 	if [[ $x -eq 0 && $y -eq 0 ]]
 	then
 		x=$((RANDOM%3))
