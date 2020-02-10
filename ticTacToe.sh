@@ -313,6 +313,33 @@ computerSmartMoveInDiagonal()
 		input
 	fi
 }
+#computerCorner
+computerCorner()
+{
+	for (( i=0;i<$ROWS;i=$((i+2)) ))
+	do
+		for (( j=0;j<$COLUMNS;j=$((j+2)) ))
+		do
+			if (( ${board[$i,$j]} == 5 ))
+			then
+				x=$i 
+				y=$j
+				break
+			fi
+		done
+	done
+	input
+}
+#computerCentre
+computerCentre()
+{
+	if (( ${board[1,1]} == 5 ))
+	then
+		x=1 
+		y=1
+	fi
+	input
+}
 #computerSmartMove
 computerSmartMove()
 {
@@ -340,6 +367,10 @@ computerMove()
 	if [[ $x -eq 0 && $y -eq 0 ]]
 	then
 		computerCorner
+	fi
+	if [[ $x -eq 0 && $y -eq 0 ]]
+	then
+		computerCentre
 	fi
 	if [[ $x -eq 0 && $y -eq 0 ]]
 	then
