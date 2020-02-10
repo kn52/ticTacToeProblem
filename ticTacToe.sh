@@ -333,10 +333,12 @@ computerMove()
 	then
 		computerSmartMove $computerTurn
 	fi	
+
 	if [[ $x -eq 0 && $y -eq 0 ]]
 	then
 		computerSmartMove $opponentTurn	
 	fi
+
 	if [[ $x -eq 0 && $y -eq 0 ]]
 	then
 		x=$((RANDOM%3))
