@@ -343,6 +343,10 @@ computerMove()
 	fi
 	if [[ $x -eq 0 && $y -eq 0 ]]
 	then
+		computerCentre
+	fi
+	if [[ $x -eq 0 && $y -eq 0 ]]
+	then
 		x=$((RANDOM%3))
 		y=$((RANDOM%3))
 		input
