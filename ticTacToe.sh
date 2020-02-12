@@ -1,23 +1,29 @@
 #!/bin/bash
 readonly ROWS=3
 readonly COLUMNS=3
+readonly MAX_COUNT=3
+readonly MAXIMUM_NUMBER=2
 readonly EMPTY=5
 declare -A board
 count=0
+booleanCount=0
 choice=1
-playerTurn=1
+flag=0
+currentPlayerTurn=1
 moves=0
 boolean=5
 position=-1
+cm=0
+flag=0
 echo "Welcome to Tic Tac Toe Problem"
 #initialize
 initialize()
 {
-	x=0
-	y=0
+	row=$1
+	column=$2
 }
-#resetGame: To initialize board or for fresh start 
-resetGame()
+#resetBoard: To initialize board or for fresh start
+resetBoard()
 {
 	for ((i=0;i<$ROWS;i++))
 	do
@@ -27,17 +33,16 @@ resetGame()
 		done
 	done
 }
-#show: Letter and Turn assign 
+#show: Letter and Turn assign
 show()
 {
 	echo "computerLetter: $computerLetter"
 	echo "opponentLetter: $opponentLetter"
 	echo "computerTurn: $computerTurn"
 	echo "opponentTurn: $opponentTurn"
-	echo
 }
-#letterAssign: To assign letter X or O
-letterAssign()
+#assignLetter: To assign letter X or O
+assignLetter()
 {
 	local randomNumber=$((RANDOM%2))
 	if (( $randomNumber == 0 ))
@@ -67,7 +72,6 @@ displayBoard()
 			elif (( ${board[$i,$j]} == $computerTurn ))
 			then
 				printf " $computerLetter "
-			
 			else
 				printf "   "
 			fi
@@ -78,7 +82,7 @@ displayBoard()
 		done
 		echo
 		if (( $i < $(( $ROWS - 1 )) ))
-		then 
+		then
 			k=0
 			while (( $k < $(( $(($ROWS*4)) - 1 )) ))
 			do
@@ -93,13 +97,13 @@ displayBoard()
 isWinnerInRow()
 {
 	num=0
-	val=$(( $playerTurn * 3 ))
+	val=$(( $currentPlayerTurn * 3 ))
 	for ((i=0;i<$ROWS;i++))
 	do
 		j=0
 		num=$(( ${board[$i,$j]} + ${board[$i,$((j+1))]} + ${board[$i,$((j+2))]} ))
 		if (( $num  == $val ))
-		then 
+		then
 			boolean=1
 			break
 		fi
@@ -109,13 +113,13 @@ isWinnerInRow()
 isWinnerInColumn()
 {
 	num=0
-	val=$(( $playerTurn * 3 ))
+	val=$(( $currentPlayerTurn * 3 ))
 	for ((i=0;i<$ROWS;i++))
 	do
 		j=0
 		num=$(( ${board[$j,$i]} + ${board[$((j+1)),$i]} + ${board[$((j+2)),$i]} ))
 		if (( $num  == $val ))
-		then 
+		then
 			boolean=1
 			break
 		fi
@@ -124,20 +128,21 @@ isWinnerInColumn()
 #isWinnerInDiagonal
 isWinnerInDiagonal()
 {
-	val=$(( $playerTurn * 3 ))
+	val=$(( $currentPlayerTurn * 3 ))
 	if (( $(( ${board[0,0]} + ${board[1,1]} + ${board[2,2]} )) == $val ))
-	then 
+	then
 		boolean=1
 	elif (( $(( ${board[2,0]} + ${board[1,1]} + ${board[0,2]} )) == $val ))
-	then 
+	then
 		boolean=1
 	fi
 }
 #isWinner: Checking current player is winner or not
 isWinner()
 {
+	boolean=5 #5 as a false and 1 as true
 	if [[ $boolean == 5 ]]
-	then	
+	then
 		isWinnerInRow
 	fi
 	if [[ $boolean == 5 ]]
@@ -151,14 +156,14 @@ isWinner()
 }
 #displayWinner: Displaying winner
 displayWinner()
-{	
+{
 	isWinner
-	if (( $boolean == 1 && $playerTurn == $computerTurn ))
+	if (( $boolean == 1 && $currentPlayerTurn == $computerTurn ))
 	then
 		echo "Computer wins...!!"
 		choice=0
 		exit
-	elif (( $boolean == 1 && $playerTurn == $opponentTurn))
+	elif (( $boolean == 1 && $currentPlayerTurn == $opponentTurn))
 	then
 		echo "You wins...!!"
 		choice=0
@@ -168,155 +173,156 @@ displayWinner()
 		echo "its a tie"
 		choice=0
 		exit
-	fi		
+	fi
 }
 #changeTurn: To change player turn
 changeTurn()
 {
-	if (( $playerTurn == 1 ))
+	if [[ $currentPlayerTurn -eq $opponentTurn ]]
 	then
-		playerTurn=2
-	else
-		playerTurn=1
+		currentPlayerTurn=$computerTurn
+	elif [[ $currentPlayerTurn -eq $computerTurn ]]
+	then
+		currentPlayerTurn=$opponentTurn
 	fi
 }
-#input: Assigning values to the board
-input()
+#inputBoard: Assigning values to the board
+inputBoard()
 {
-	if (($x<0 || $x>2 || $y<0 || $y>2 ))
+	if (( $row < 0 || $row > 2 || $column < 0 || $column > 2 ))
 	then
 		echo "Invalid Move"
-	elif (( ${board[$x,$y]} == $EMPTY ))
+	elif (( ${board[$row,$column]} == $EMPTY ))
 	then
 		((++moves))
-		board[$x,$y]=$playerTurn
-		displayBoard		
+		board[$row,$column]=$currentPlayerTurn
+		displayBoard
 		displayWinner
 		changeTurn
-	else 
+	else
 		echo "Board is Occupied"
 	fi
 }
 #computerSmartMoveInRow
 computerSmartMoveInRow()
 {
-	flag=0
 	letter=$1
+	emptyCount=0
+	letterCount=0
 	for ((i=0;i<$ROWS;i++))
 	do
-		j=0
-		if (( ${board[$i,$j]} == $letter && ${board[$i,$((j+1))]} == $letter && ${board[$i,$((j+2))]} == $EMPTY ))	
-		then 
-			x=$i 
-			y=$((j+2))
-			flag=1
-			input
-			break
-		fi
-		if (( ${board[$i,$j]} == $EMPTY && ${board[$i,$((j+1))]} == $letter && ${board[$i,$((j+2))]} == $letter ))	
-		then
-			x=$i 
-			y=$j
-			flag=1 
-			input
-			break
-		fi
-		if (( ${board[$i,$j]} == $letter && ${board[$i,$((j+1))]} == $EMPTY && ${board[$i,$((j+2))]} == $letter ))	
-		then 
-			x=$i 
-			y=$((j+1))
-			flag=1
-			input
-			break
-		fi
+		emptyCount=0
+		letterCount=0
+		for ((j=0;j<$COLUMNS;j++))
+		do
+			if [[ ${board[$i,$j]} -eq 5 ]]
+			then
+				rowValue=$i
+				columnValue=$j
+				((emptyCount++))
+			fi
+			if [[ ${board[$i,$j]} -eq $letter ]]
+			then
+				((letterCount++))
+			fi
+			if (( $emptyCount == 1 && $letterCount == 2 ))
+			then
+				flag=1
+				initialize $rowValue $columnValue
+				inputBoard
+				return
+			fi
+		done
 	done
 }
 #computerSmartMoveInColumn
 computerSmartMoveInColumn()
 {
-	flag=0
 	letter=$1
+	emptyCount=0
+	letterCount=0
 	for ((i=0;i<$ROWS;i++))
 	do
-		j=0
-		if (( ${board[$j,$i]} == $letter && ${board[$((j+1)),$i]} == $letter && ${board[$((j+2)),$i]} == $EMPTY ))	
-		then 
-			x=$((j+2)) 
-			y=$i
-			flag=1
-			input
-			break
-		fi
-		if (( ${board[$j,$i]} == $EMPTY && ${board[$((j+1)),$i]} == $letter && ${board[$((j+2)),$i]} == $letter ))	
-		then 
-			x=$j 
-			y=$i
-			flag=1			
-			input
-			break
-		fi
-		if (( ${board[$j,$i]} == $letter && ${board[$((j+1)),$i]} == $EMPTY && ${board[$((j+2)),$i]} == $letter ))	
-		then 
-			x=$((j+1)) 
-			y=$i
-			flag=1
-			input
-			break
-		fi
+		emptyCount=0
+		letterCount=0
+		for ((j=0;j<$COLUMNS;j++))
+		do
+			if [[ ${board[$j,$i]} -eq 5 ]]
+			then
+				rowValue=$j
+				columnValue=$i
+				((emptyCount++))
+			fi
+			if [[ ${board[$j,$i]} -eq $letter ]]
+			then
+				((letterCount++))
+			fi
+			if (( $emptyCount == 1 && $letterCount == 2 ))
+			then
+				flag=1
+				initialize $rowValue $columnValue
+				inputBoard
+				return
+			fi
+		done
 	done
 }
 #computerSmartMoveInDiagonal
 computerSmartMoveInDiagonal()
 {
-	flag=0
 	letter=$1
-	if (( ${board[0,0]} == $letter && ${board[1,1]} == $letter && ${board[2,2]} == $EMPTY ))
-	then
-		x=2
-		y=2
-		flag=1
-		input
-	fi 
-	if (( ${board[0,0]} == $letter && ${board[1,1]} == $EMPTY && ${board[2,2]} == $letter ))
-	then 
-		x=1
-		y=1
-		flag=1
-		input
-	fi
-	if (( ${board[0,0]} == $EMPTY && ${board[1,1]} == $letter && ${board[2,2]} == $letter ))
-	then 
-		x=0
-		y=0
-		flag=1
-		input
-	fi
-	if (( ${board[2,0]} == $letter && ${board[1,1]} == $letter && ${board[0,2]} == $EMPTY ))
-	then 
-		x=0
-		y=2
-		flag=1
-		input
-	fi
-	if (( ${board[2,0]} == $letter && ${board[1,1]} == $EMPTY && ${board[0,2]} == $letter ))
-	then 
-		x=1
-		y=1
-		flag=1
-		input
-	fi
-	if (( ${board[2,0]} == $EMPTY if [[ $x -eq 0 && $y -eq 0 ]]
-	then
-		computerCentre
-	fi&& ${board[1,1]} == $letter && ${board[0,2]} == $letter ))
-	then 
-		x=2
-		y=0
-		flag=1
-		input
-	fi
+	local emptyCount1=0
+	local emptyCount2=0
+	local letterCount1=0
+	local letterCount2=0
+	for ((i=0;i<$ROWS;i++))
+	do
+		for ((j=0;j<$COLUMNS;j++))
+		do
+			if (( $i == $j ))
+			then
+				if [ ${board[$i,$j]} -eq 5 ]
+				then
+					rowValue=$i
+					columnValue=$j
+					((emptyCount1++))
+				fi
+				if (( ${board[$i,$j]} == $letter ))
+				then
+					((letterCount1++))
+				fi
+				if (( $emptyCount1 == 1 && $letterCount1 == 2 ))
+				then
+					flag=1
+					initialize $rowValue $columnValue
+					inputBoard
+					return
+				fi
+			fi
+			if (( $(($i+$j)) == 2 ))
+			then
+				if [[ ${board[$i,$j]} -eq 5 ]]
+				then
+					rowValue1=$i
+					columnValue1=$j
+					((emptyCount2++))
+				fi
+				if (( ${board[$i,$j]} == $letter ))
+				then
+					((letterCount2++))
+				fi
+				if (( $emptyCount2 == 1 && $letterCount2 == 2 ))
+				then
+					flag=1
+					initialize $rowValue1 $columnValue1
+					inputBoard
+					return
+				fi
+			fi
+		done
+	done
 }
-#computerCorner
+#computerCorner: Search for corner to be empty
 computerCorner()
 {
 	for (( i=0;i<$ROWS;i=$((i+2)) ))
@@ -325,61 +331,64 @@ computerCorner()
 		do
 			if (( ${board[$i,$j]} == 5 ))
 			then
-				x=$i 
-				y=$j
+				row=$i
+				column=$j
+				flag=1
 				break
 			fi
 		done
 	done
-	input
+	inputBoard
 }
-#computerCentre
+#computerCentre: Search for centre to be empty
 computerCentre()
 {
 	if (( ${board[1,1]} == 5 ))
 	then
-		x=1 
-		y=1
+		row=1
+		column=1
+		flag=1
 	fi
-	input
+	inputBoard
 }
-#computerSide
+#computerSide: Search for side to be empty
 computerSide()
 {
-	key=0
-	flag=0
-	for (( i=0 ;i<$ROWS;i++ ))
+	for (( i=0;i<$ROWS;i++ ))
 	do
-		if (( $key == 0 ))
-		then
-			if (( ${board[$i,$((key+1))]} == $computerTurn ))
+		for (( j=0;j<$(($COLUMNS-1));j++ ))
+		do
+			if [[ $i -eq 0 || $i -eq $(($COLUMNS-1)) ]]
 			then
-				x=$i
-				y=$(($key+1))
-				flag=1
-			fi
-			key=1
-		else
-			for ((j=0;j<$COLUMNS;j=j+2))
-			do
-				if (( ${board[$i,$((j+2))]} == $computerTurn ))
+				if [[ $j -gt 0 || $j -lt $(($COLUMNS-1)) ]]
 				then
-					x=$i
-					y=$((j+2))
-					flag=1
+					if [[ ${board[$i,$j]} -eq $EMPTY ]]
+					then
+						initialize $i $j
+						flag=1
+						break
+					fi
 				fi
-			done
-			key=0
-		fi
-		if (( $flag == 1 ))
+			else
+				if [[ $j -eq 0 || $j -eq $(($COLUMNS-1)) ]]
+				then
+					if [[ ${board[$i,$j]} -eq $EMPTY ]]
+					then
+						initialize $i $j
+						flag=1
+						break
+					fi
+				fi
+			fi
+		done
+		if [[ $flag -eq 1 ]]
 		then
 			break
 		fi
 	done
-	input		
+	inputBoard
 }
-
-#computerSmartMove
+#computerSmartMove: Computer mart moves
 computerSmartMove()
 {
 	sign=$1
@@ -387,73 +396,71 @@ computerSmartMove()
 	if [[ $flag -eq 0 ]]
 	then
 		computerSmartMoveInColumn $sign
-	elif [[ $flag -eq 0 ]]
+	fi
+	if [[ $flag -eq 0 ]]
 	then
 		computerSmartMoveInDiagonal $sign
-	fi	
-}
-#computerMove
-computerMove()
-{	
-	if [[ $x -eq 0 && $y -eq 0 ]]
-	then
-		computerSmartMove $computerTurn
-	fi	
-	if [[ $x -eq 0 && $y -eq 0 ]]
-	then
-		computerSmartMove $opponentTurn	
 	fi
-	if [[ $x -eq 0 && $y -eq 0 ]]
+}
+#computerMove: Computer Moves
+computerMove()
+{
+	flag=0
+	computerSmartMove $computerTurn
+	if [[ $flag -eq 0 ]]
+	then
+		computerSmartMove $opponentTurn
+	fi
+	if [[ $flag -eq 0 ]]
 	then
 		computerCorner
 	fi
-	if [[ $x -eq 0 && $y -eq 0 ]]
+	if [[ $flag -eq 0 ]]
 	then
 		computerCentre
 	fi
-	if [[ $x -eq 0 && $y -eq 0 ]]
+	if [[ $flag -eq 0 ]]
 	then
 		computerSide
 	fi
 }
-#opponentMove
+#opponentMove: User Moves
 opponentMove()
 {
-	echo "Enter Your Move:"
-	read position
-	x=$(($position/10)) 
-	y=$(($position%10))
 	echo "Your Move"
-	input 
+	read position
+	row=$(( $position / 10 ))
+	column=$(( $position % 10))
+	inputBoard
 }
-#ticTacToe: Game
-ticTacToe()
+#startGame: Run until one of the player will win
+startGame()
 {
 	while (( $choice == 1 ))
 	do
-		initialize
+		initialize 0 0
 		((++count))
-		if (( $playerTurn == $opponentTurn ))
+		echo "===player turn : $currentPlayerTurn===="
+		if (( $currentPlayerTurn == $opponentTurn ))
 		then
-			opponentMove			
-		elif (( $playerTurn == $computerTurn ))
-		then				
+			opponentMove
+		fi
+		if (( $currentPlayerTurn == $computerTurn ))
+		then
 			echo "Computer Move"
-			if [[ $count -eq 1 ]]
-			then
-				computerCorner
-			else			
-				computerMove			
-			fi			
+			computerMove
 		fi
 	done
 }
-#startGame: Initial conditions  
-startGame()
+#freshStart: Initial conditions
+freshStart()
 {
-	resetGame
-	letterAssign
+	resetBoard
+	assignLetter
 }
-startGame
+freshStart
 displayBoard
-ticTacToe
+startGame
+
+
+
